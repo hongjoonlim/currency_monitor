@@ -1,0 +1,25 @@
+name: currency_monitor
+description: 유로와 한국 원화의 환율 정보를 보여주는 앱
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.19.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.5
+  http: ^1.1.0
+  provider: ^6.0.5
+  intl: ^0.18.1
+  shared_preferences: ^2.2.0
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.2
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>환율 모니터</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        header {
+            background-color: #2196F3;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .rate-display {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .rate-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2196F3;
+        }
+        .last-updated {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        .converter {
+            padding: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .input-group {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .currency-label {
+            width: 60px;
+            text-align: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-left: none;
+            border-radius: 0 4px 4px 0;
+        }
+        .chart {
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            height: 200px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(33, 150, 243, 0.1), transparent);
+        }
+        .chart-path {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+        .period-selector {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+        .period-btn {
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .period-btn.active {
+            background-color: #2196F3;
+            color: white;
+            border-color: #2196F3;
+        }
+        .refresh-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .refresh-btn:hover {
+            background-color: #1976D2;
+        }
+        .y-axis {
+            position: absolute;
+            left: 5px;
+            top: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 3;
+        }
+        .y-label {
+            width: 6px;
+            height: 6px;
+            background-color: #555;
+            border-radius: 50%;
+        }
+        .y-label.major {
+            width: 8px;
+            height: 8px;
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>환율 모니터</h1>
+        </header>
+        
+        <div class="rate-display">
+            <div class="rate-value">1 EUR = 1,450.25 KRW</div>
+            <div class="last-updated">마지막 업데이트: 2025-05-03 11:00:00</div>
+        </div>
+        
+        <div class="converter">
+            <div class="input-group">
+                <input type="number" id="eurInput" value="1" min="0" step="0.01">
+                <div class="currency-label">EUR</div>
+            </div>
+            <div class="input-group">
+                <input type="number" id="krwInput" value="1450.25" min="0" step="0.01">
+                <div class="currency-label">KRW</div>
+            </div>
+        </div>
+        
+        <div class="chart">
+            <div class="period-selector">
+                <div class="period-btn active" id="day">일간</div>
+                <div class="period-btn" id="month">월간</div>
+                <div class="period-btn" id="year">년간</div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="y-axis">
+                    <div class="y-label major"></div>
+                    <div class="y-label"></div>
+                    <div class="y-label"></div>
+                    <div class="y-label major"></div>
+                    <div class="y-label"></div>
+                    <div class="y-label"></div>
+                    <div class="y-label major"></div>
+                </div>
+                <div class="chart-line"></div>
+                <svg class="chart-path" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M0,70 L10,65 L20,40 L30,50 L40,30 L50,20 L60,40 L70,60 L80,50 L90,55 L100,45" 
+                          stroke="#2196F3" 
+                          stroke-width="2" 
+                          fill="none" />
+                </svg>
+            </div>
+        </div>
+        
+        <button class="refresh-btn" id="refreshBtn">새로고침</button>
+    </div>
+
+    <script>
+        // 환율 정보
+        const rate = 1450.25;
+        
+        // 입력 필드 참조
+        const eurInput = document.getElementById('eurInput');
+        const krwInput = document.getElementById('krwInput');
+        
+        // 환율 변환 함수
+        function convertEurToKrw(eurAmount) {
+            return eurAmount * rate;
+        }
+        
+        function convertKrwToEur(krwAmount) {
+            return krwAmount / rate;
+        }
+        
+        // 이벤트 리스너
+        eurInput.addEventListener('input', function() {
+            const eurValue = parseFloat(eurInput.value) || 0;
+            krwInput.value = convertEurToKrw(eurValue).toFixed(2);
+        });
+        
+        krwInput.addEventListener('input', function() {
+            const krwValue = parseFloat(krwInput.value) || 0;
+            eurInput.value = convertKrwToEur(krwValue).toFixed(2);
+        });
+        
+        // 기간 선택 버튼
+        const periodBtns = document.querySelectorAll('.period-btn');
+        periodBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                periodBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                // 여기에 차트 데이터 업데이트 로직 추가
+            });
+        });
+        
+        // 새로고침 버튼
+        document.getElementById('refreshBtn').addEventListener('click', function() {
+            alert('환율 정보가 업데이트되었습니다.');
+            // 실제로는 여기서 API 호출 등을 통해 데이터 업데이트
+        });
+    </script>
+</body>
+</html>

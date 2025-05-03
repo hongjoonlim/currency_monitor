@@ -1,0 +1,8 @@
+{
+  "homepage": "https://hongjoonlim.github.io/currency_monitor",
+  "name": "currency_monitor",
+  "version": "0.1.0",
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  }
+}
